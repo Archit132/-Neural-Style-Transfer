@@ -63,14 +63,12 @@ def reconstruct_image_from_representation(config):
     # indices pick relevant feature maps (say conv4_1, relu1_1, etc.)
     neural_net, content_feature_maps_index_name, style_feature_maps_indices_names = utils.prepare_model(config['model'], device)
 
-    # don't want to expose everything that's not crucial so some things are hardcoded
+    
     num_of_iterations = {'adam': 3000, 'lbfgs': 350}
 
     set_of_feature_maps = neural_net(img)
 
-    #
-    # Visualize feature maps and Gram matrices (depending whether you're reconstructing content or style img)
-    #
+    
     if should_reconstruct_content:
         target_content_representation = set_of_feature_maps[content_feature_maps_index_name[0]].squeeze(axis=0)
         if should_visualize_representation:
@@ -113,7 +111,7 @@ def reconstruct_image_from_representation(config):
     elif config['optimizer'] == 'lbfgs':
         cnt = 0
 
-        # closure is a function required by L-BFGS optimizer
+        
         def closure():
             nonlocal cnt
             optimizer.zero_grad()
@@ -139,18 +137,13 @@ def reconstruct_image_from_representation(config):
 
 
 if __name__ == "__main__":
-    #
-    # fixed args - don't change these unless you have a good reason (default img locations and img dump format)
-    #
+    
     default_resource_dir = os.path.join(os.path.dirname(__file__), 'data')
     content_images_dir = os.path.join(default_resource_dir, 'content-images')
     style_images_dir = os.path.join(default_resource_dir, 'style-images')
     output_img_dir = os.path.join(default_resource_dir, 'output-images')
     img_format = (4, '.jpg')  # saves images in the format: %04d.jpg
 
-    #
-    # modifiable args - feel free to play with these (only small subset is exposed by design to avoid cluttering)
-    #
     parser = argparse.ArgumentParser()
     parser.add_argument("--should_reconstruct_content", type=bool, help="pick between content or style image reconstruction", default=True)
     parser.add_argument("--should_visualize_representation", type=bool, help="visualize feature maps or Gram matrices", default=False)
@@ -165,7 +158,7 @@ if __name__ == "__main__":
     parser.add_argument("--reconstruct_script", type=str, help='dummy param - used in saving func', default=True)
     args = parser.parse_args()
 
-    # just wrapping settings into a dictionary
+   
     optimization_config = dict()
     for arg in vars(args):
         optimization_config[arg] = getattr(args, arg)
@@ -174,7 +167,7 @@ if __name__ == "__main__":
     optimization_config['output_img_dir'] = output_img_dir
     optimization_config['img_format'] = img_format
 
-    # reconstruct style or content image purely from their representation
+    
     results_path = reconstruct_image_from_representation(optimization_config)
 
-    # create_video_from_intermediate_results(results_path, img_format)
+    
