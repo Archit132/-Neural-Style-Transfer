@@ -66,12 +66,12 @@ def neural_style_transfer(config):
     elif config['init_method'] == 'content':
         init_img = content_img
     else:
-        # init image has same dimension as content image - this is a hard constraint
-        # feature maps need to be of same size for content image and init image
+    
+        # feature maps need -same size for content image and init image
         style_img_resized = utils.prepare_img(style_img_path, np.asarray(content_img.shape[2:]), device)
         init_img = style_img_resized
 
-    # we are tuning optimizing_img's pixels! (that's why requires_grad=True)
+    # we are tuning optimizing_img's pixels
     optimizing_img = Variable(init_img, requires_grad=True)
 
     neural_net, content_feature_maps_index_name, style_feature_maps_indices_names = utils.prepare_model(config['model'], device)
@@ -84,7 +84,7 @@ def neural_style_transfer(config):
     target_style_representation = [utils.gram_matrix(x) for cnt, x in enumerate(style_img_set_of_feature_maps) if cnt in style_feature_maps_indices_names[0]]
     target_representations = [target_content_representation, target_style_representation]
 
-    # magic numbers in general are a big no no - some things in this code are left like this by design to avoid clutter
+
     num_of_iterations = {
         "lbfgs": 1000,
         "adam": 3000,
@@ -126,19 +126,14 @@ def neural_style_transfer(config):
 
 
 if __name__ == "__main__":
-    #
-    # fixed args - don't change these unless you have a good reason
-    #
+    
     default_resource_dir = os.path.join(os.path.dirname(__file__), 'data')
     content_images_dir = os.path.join(default_resource_dir, 'content-images')
     style_images_dir = os.path.join(default_resource_dir, 'style-images')
     output_img_dir = os.path.join(default_resource_dir, 'output-images')
     img_format = (4, '.jpg')  # saves images in the format: %04d.jpg
 
-    #
-    # modifiable args - feel free to play with these (only small subset is exposed by design to avoid cluttering)
-    # sorted so that the ones on the top are more likely to be changed than the ones on the bottom
-    #
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--content_img_name", type=str, help="content image name", default='figures.jpg')
     parser.add_argument("--style_img_name", type=str, help="style image name", default='vg_starry_night.jpg')
@@ -154,8 +149,6 @@ if __name__ == "__main__":
     parser.add_argument("--saving_freq", type=int, help="saving frequency for intermediate images (-1 means only final)", default=-1)
     args = parser.parse_args()
 
-    # some values of weights that worked for figures.jpg, vg_starry_night.jpg (starting point for finding good images)
-    # once you understand what each one does it gets really easy -> also see README.md
 
     # lbfgs, content init -> (cw, sw, tv) = (1e5, 3e4, 1e0)
     # lbfgs, style   init -> (cw, sw, tv) = (1e5, 1e1, 1e-1)
@@ -165,7 +158,7 @@ if __name__ == "__main__":
     # adam, style   init -> (cw, sw, tv, lr) = (1e5, 1e2, 1e-1, 1e1)
     # adam, random  init -> (cw, sw, tv, lr) = (1e5, 1e2, 1e-1, 1e1)
 
-    # just wrapping settings into a dictionary
+
     optimization_config = dict()
     for arg in vars(args):
         optimization_config[arg] = getattr(args, arg)
@@ -174,8 +167,5 @@ if __name__ == "__main__":
     optimization_config['output_img_dir'] = output_img_dir
     optimization_config['img_format'] = img_format
 
-    # original NST (Neural Style Transfer) algorithm (Gatys et al.)
     results_path = neural_style_transfer(optimization_config)
 
-    # uncomment this if you want to create a video from images dumped during the optimization procedure
-    # create_video_from_intermediate_results(results_path, img_format)
