@@ -2,11 +2,7 @@ from collections import namedtuple
 import torch
 from torchvision import models
 
-"""
-    More detail about the VGG architecture (if you want to understand magic/hardcoded numbers) can be found here:
-    
-    https://github.com/pytorch/vision/blob/3c254fb7af5f8af252c24e89949c54a3461ff0be/torchvision/models/vgg.py
-"""
+
 
 
 class Vgg16(torch.nn.Module):
@@ -49,7 +45,7 @@ class Vgg16(torch.nn.Module):
 
 
 class Vgg16Experimental(torch.nn.Module):
-    """Everything exposed so you can play with different combinations for style and content representation"""
+    
     def __init__(self, requires_grad=False, show_progress=False):
         super().__init__()
         vgg_pretrained_features = models.vgg16(pretrained=True, progress=show_progress).features
@@ -150,7 +146,7 @@ class Vgg16Experimental(torch.nn.Module):
         x = self.relu5_3(x)
         relu5_3 = x
         x = self.max_pooling5(x)
-        # expose only the layers that you want to experiment with here
+        
         vgg_outputs = namedtuple("VggOutputs", self.layer_names)
         out = vgg_outputs(relu1_1, relu2_1, relu2_2, relu3_1, relu3_2, relu4_1, relu4_3, relu5_1)
 
@@ -158,12 +154,7 @@ class Vgg16Experimental(torch.nn.Module):
 
 
 class Vgg19(torch.nn.Module):
-    """
-    Used in the original NST paper, only those layers are exposed which were used in the original paper
-
-    'conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1' were used for style representation
-    'conv4_2' was used for content representation (although they did some experiments with conv2_2 and conv5_2)
-    """
+   
     def __init__(self, requires_grad=False, show_progress=False, use_relu=True):
         super().__init__()
         vgg_pretrained_features = models.vgg19(pretrained=True, progress=show_progress).features
